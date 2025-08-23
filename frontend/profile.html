@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil do Usuário</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-md mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">Perfil</h1>
+
+    <input type="text" id="name" placeholder="Nome" class="border p-2 rounded w-full mb-2">
+    <input type="text" id="username" placeholder="Username" class="border p-2 rounded w-full mb-2">
+    <input type="email" id="email" placeholder="Email" class="border p-2 rounded w-full mb-2">
+
+    <button onclick="updateProfile()" class="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2">Atualizar</button>
+    <button onclick="deleteProfile()" class="bg-red-500 text-white px-4 py-2 rounded w-full">Excluir Conta</button>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:8000/api/v1';
+    const token = localStorage.getItem('token');
+
+    async function loadProfile() {
+      const res = await fetch(`${API_URL}/auth/me`, {headers: {'Authorization': 'Bearer ' + token}});
+      const data = await res.json();
+      document.getElementById('name').value = data.name;
+      document.getElementById('username').value = data.username;
+      document.getElementById('email').value = data.email;
+    }
+
+    async function updateProfile() {
+      const name = document.getElementById('name').value;
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+
+      await fetch(`${API_URL}/auth/update`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
+        body: JSON.stringify({name, username, email})
+      });
+      alert('Perfil atualizado!');
+    }
+
+    async function deleteProfile() {
+      if(!confirm('Deseja realmente excluir a conta?')) return;
+      await fetch(`${API_URL}/auth/destroy`, {
+        method: 'DELETE',
+        headers: {'Authorization': 'Bearer ' + token}
+      });
+      alert('Conta excluída!');
+      localStorage.removeItem('token');
+      window.location.href = 'auth.html';
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>

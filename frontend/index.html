@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login / Registro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-md mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">Autenticação</h1>
+
+    <input type="text" id="login" placeholder="Email ou Username" class="border p-2 rounded w-full mb-2">
+    <input type="password" id="password" placeholder="Senha" class="border p-2 rounded w-full mb-2">
+
+    <button onclick="login()" class="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2">Login</button>
+
+    <h2 class="text-lg font-semibold mt-4 mb-2">Registrar</h2>
+    <input type="text" id="name" placeholder="Nome" class="border p-2 rounded w-full mb-2">
+    <input type="text" id="username" placeholder="Username" class="border p-2 rounded w-full mb-2">
+    <input type="email" id="email" placeholder="Email" class="border p-2 rounded w-full mb-2">
+    <input type="password" id="reg-password" placeholder="Senha" class="border p-2 rounded w-full mb-2">
+    <input type="password" id="password_confirmation" placeholder="Confirme a senha" class="border p-2 rounded w-full mb-2">
+    <button onclick="register()" class="bg-green-500 text-white px-4 py-2 rounded w-full">Registrar</button>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:8000/api/v1';
+    function setToken(token) { localStorage.setItem('token', token); }
+
+    async function login() {
+      const loginValue = document.getElementById('login').value;
+      const password = document.getElementById('password').value;
+
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({login: loginValue, password})
+      });
+      const data = await res.json();
+      if(data.token) {
+        setToken(data.token);
+        alert('Logado com sucesso!');
+        window.location.href = 'news.html';
+      } else alert(JSON.stringify(data));
+    }
+
+    async function register() {
+      const name = document.getElementById('name').value;
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('reg-password').value;
+      const password_confirmation = document.getElementById('password_confirmation').value;
+
+      const res = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name, username, email, password, password_confirmation})
+      });
+      const data = await res.json();
+      if(data.token) {
+        setToken(data.token);
+        alert('Registrado com sucesso!');
+        window.location.href = 'news.html';
+      } else alert(JSON.stringify(data));
+    }
+  </script>
+</body>
+</html>
