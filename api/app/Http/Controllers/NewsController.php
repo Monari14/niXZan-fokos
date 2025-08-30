@@ -6,6 +6,7 @@ use App\Models\News;
 use App\Http\Resources\NewsResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\NewLiked;
 
 class NewsController extends Controller
 {
@@ -68,5 +69,46 @@ class NewsController extends Controller
         $news->delete();
 
         return response()->json(['message' => 'Notícia removida com sucesso']);
+    }
+
+    public function like(Request $request, $id_new)
+    {
+        $new = News::find($id_new);
+        if (!$new) {
+            return response()->json(['message' => 'Mober não encontrado.'], 404);
+        }
+
+        $alreadyLiked = $new->likes()->where('user_id', $request->user()->id)->exists();
+
+        if ($alreadyLiked) {
+            return response()->json(['message' => 'Você já curtiu este mober.'], 400);
+        }
+
+        $new->likes()->create([
+            'user_id' => $request->user()->id,
+        ]);
+
+        // Notifica o like
+        $new->user->notify(new NewLiked($request->user(), $new->id));
+
+        return response()->json(['message' => 'Mober curtido!']);
+    }
+
+    public function unlike(Request $request, $id_new)
+    {
+        $new = News::find($id_new);
+        if (!$new) {
+            return response()->json(['message' => 'Mober não encontrado.'], 404);
+        }
+
+        $like = $new->likes()->where('user_id', $request->user()->id)->first();
+
+        if (!$like) {
+            return response()->json(['message' => 'Você não curtiu este mober.'], 400);
+        }
+
+        $like->delete();
+
+        return response()->json(['message' => 'Curtida removida.']);
     }
 }
