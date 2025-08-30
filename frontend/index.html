@@ -1,69 +1,76 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="transition-colors duration-500">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login / Registro</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login / Registro</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+</script>
+<style>
+  /* Animação sutil do fundo */
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+</style>
 </head>
-<body class="bg-gray-100 p-6">
-  <div class="max-w-md mx-auto bg-white p-6 rounded shadow">
-    <h1 class="text-2xl font-bold mb-4">Autenticação</h1>
+<body class="min-h-screen flex flex-col items-center justify-start p-6 transition-colors duration-500
+  bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900
+  text-gray-900 dark:text-gray-100" style="background-size: 400% 400%; animation: gradientShift 20s ease infinite;">
 
-    <input type="text" id="login" placeholder="Email ou Username" class="border p-2 rounded w-full mb-2">
-    <input type="password" id="password" placeholder="Senha" class="border p-2 rounded w-full mb-2">
+<!-- Header -->
+<div class="w-full max-w-6xl flex justify-between items-center mb-8">
+  <h1 class="text-5xl font-extrabold bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent tracking-tight">fokos</h1>
+  <button id="theme-toggle" class="px-5 py-2 rounded-xl bg-gray-700 dark:bg-gray-300 hover:bg-gray-800 dark:hover:bg-gray-400 transition text-white dark:text-gray-800 font-medium shadow-md">🌙</button>
+</div>
 
-    <button onclick="login()" class="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2">Login</button>
+<!-- Conteúdo dividido -->
+<div class="max-w-6xl w-full flex flex-col lg:flex-row gap-10">
+  <!-- Cadastro -->
+  <div class="lg:w-1/2 w-full">
+    <div class="p-8 rounded-3xl shadow-2xl bg-white/80 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 transition-colors duration-500 hover:scale-105 transform transition-transform duration-300">
+      <h2 class="text-2xl font-extrabold mb-6 text-gray-800 dark:text-gray-100">Registrar</h2>
 
-    <h2 class="text-lg font-semibold mt-4 mb-2">Registrar</h2>
-    <input type="text" id="name" placeholder="Nome" class="border p-2 rounded w-full mb-2">
-    <input type="text" id="username" placeholder="Username" class="border p-2 rounded w-full mb-2">
-    <input type="email" id="email" placeholder="Email" class="border p-2 rounded w-full mb-2">
-    <input type="password" id="reg-password" placeholder="Senha" class="border p-2 rounded w-full mb-2">
-    <input type="password" id="password_confirmation" placeholder="Confirme a senha" class="border p-2 rounded w-full mb-2">
-    <button onclick="register()" class="bg-green-500 text-white px-4 py-2 rounded w-full">Registrar</button>
+      <input type="text" id="name" placeholder="Nome"
+        class="w-full mb-4 px-5 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 shadow-sm focus:ring-2 focus:ring-green-400 focus:outline-none dark:bg-gray-700 dark:text-gray-100 transition-colors duration-500">
+
+      <input type="text" id="username" placeholder="Username"
+        class="w-full mb-4 px-5 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 shadow-sm focus:ring-2 focus:ring-green-400 focus:outline-none dark:bg-gray-700 dark:text-gray-100 transition-colors duration-500">
+
+      <input type="email" id="email" placeholder="Email"
+        class="w-full mb-4 px-5 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 shadow-sm focus:ring-2 focus:ring-green-400 focus:outline-none dark:bg-gray-700 dark:text-gray-100 transition-colors duration-500">
+
+      <input type="password" id="reg-password" placeholder="Senha"
+        class="w-full mb-4 px-5 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 shadow-sm focus:ring-2 focus:ring-green-400 focus:outline-none dark:bg-gray-700 dark:text-gray-100 transition-colors duration-500">
+
+      <input type="password" id="password_confirmation" placeholder="Confirme a senha"
+        class="w-full mb-6 px-5 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 shadow-sm focus:ring-2 focus:ring-green-400 focus:outline-none dark:bg-gray-700 dark:text-gray-100 transition-colors duration-500">
+
+      <button onclick="register()" class="w-full px-6 py-3 rounded-2xl bg-green-600 hover:bg-green-700 transition text-white font-semibold shadow-lg hover:shadow-xl">Registrar</button>
+    </div>
   </div>
 
-  <script>
-    const API_URL = 'http://localhost:8000/api/v1';
-    function setToken(token) { localStorage.setItem('token', token); }
+  <!-- Login -->
+  <div class="lg:w-1/2 w-full">
+    <div class="p-8 rounded-3xl shadow-2xl bg-white/80 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 transition-colors duration-500 hover:scale-105 transform transition-transform duration-300">
+      <h2 class="text-2xl font-extrabold mb-6 text-gray-800 dark:text-gray-100">Login</h2>
 
-    async function login() {
-      const loginValue = document.getElementById('login').value;
-      const password = document.getElementById('password').value;
+      <input type="text" id="login" placeholder="Email ou Username"
+        class="w-full mb-4 px-5 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none dark:bg-gray-700 dark:text-gray-100 transition-colors duration-500">
 
-      const res = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({login: loginValue, password})
-      });
-      const data = await res.json();
-      if(data.token) {
-        setToken(data.token);
-        alert('Logado com sucesso!');
-        window.location.href = 'news.html';
-      } else alert(JSON.stringify(data));
-    }
+      <input type="password" id="password" placeholder="Senha"
+        class="w-full mb-6 px-5 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none dark:bg-gray-700 dark:text-gray-100 transition-colors duration-500">
 
-    async function register() {
-      const name = document.getElementById('name').value;
-      const username = document.getElementById('username').value;
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('reg-password').value;
-      const password_confirmation = document.getElementById('password_confirmation').value;
+      <button onclick="login()" class="w-full px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 transition text-white font-semibold shadow-lg hover:shadow-xl">Login</button>
+    </div>
+  </div>
+</div>
 
-      const res = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({name, username, email, password, password_confirmation})
-      });
-      const data = await res.json();
-      if(data.token) {
-        setToken(data.token);
-        alert('Registrado com sucesso!');
-        window.location.href = 'news.html';
-      } else alert(JSON.stringify(data));
-    }
-  </script>
+<script src="js/theme.js"></script>
+
+<script src="js/auth/auth.js"></script>
 </body>
 </html>

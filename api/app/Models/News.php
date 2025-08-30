@@ -13,18 +13,11 @@ class News extends Model
         'title',
         'content',
         'user_id',
-        'category_id',
     ];
 
     // Relacionamento: uma notícia pertence a um usuário (autor)
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    // Relacionamento: uma notícia pertence a uma categoria
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
     }
 }

@@ -6,7 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserSettings extends Model
 {
-    protected $fillable = ['user_id', 'theme', 'language'];
+    protected $fillable = [
+        'user_id',
+        'theme',
+    ];
 
     public function user()
     {

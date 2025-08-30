@@ -1,156 +1,64 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="transition-colors duration-500">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notícias</title>
+  <title>fokos</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class', // Habilita dark mode via classe
+    }
+  </script>
 </head>
-<body class="bg-gray-100 p-6">
-  <div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold mb-4">Notícias</h1>
-    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded mb-4">Logout</button>
+<body class="min-h-screen flex flex-col items-center justify-start p-6 transition-colors duration-500
+  bg-gradient-to-br from-gray-100 via-white to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900
+  text-gray-900 dark:text-gray-100">
 
-    <!-- Criar / Editar Notícia -->
-    <div class="mb-6 p-4 bg-white rounded shadow">
-      <h2 class="text-xl font-semibold mb-2">Criar / Editar Notícia</h2>
-      <input type="hidden" id="news-id">
-      <input type="text" id="news-title" placeholder="Título" class="border p-2 rounded w-full mb-2">
-      <textarea id="news-content" placeholder="Conteúdo" class="border p-2 rounded w-full mb-2"></textarea>
-
-      <!-- Seleção de categoria -->
-      <div class="flex gap-2 mb-2">
-        <select id="news-category" class="border p-2 rounded flex-1">
-          <option value="">Selecione Categoria</option>
-        </select>
-        <!-- Pequeno espaço para criar categoria -->
-        <input type="text" id="new-category" placeholder="Nova categoria" class="border p-2 rounded flex-1">
-        <button onclick="createCategory()" class="bg-green-500 text-white px-4 py-2 rounded">+</button>
-      </div>
-
-      <div class="flex gap-2">
-        <button onclick="saveNews()" class="bg-blue-500 text-white px-4 py-2 rounded flex-1">Salvar Notícia</button>
-        <button onclick="resetForm()" class="bg-gray-500 text-white px-4 py-2 rounded flex-1">Cancelar</button>
-      </div>
-    </div>
-
-    <!-- Lista de Notícias -->
-    <ul id="news-list" class="list-disc pl-5"></ul>
-    <div class="mt-4 flex justify-between">
-      <button onclick="prevPage()" class="bg-blue-500 text-white px-4 py-2 rounded">Anterior</button>
-      <span id="page-info"></span>
-      <button onclick="nextPage()" class="bg-blue-500 text-white px-4 py-2 rounded">Próxima</button>
+  <!-- Header -->
+  <div class="w-full max-w-6xl flex justify-between items-center mb-8">
+    <h1 class="text-4xl font-extrabold bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent tracking-tight">fokos</h1>
+    <div class="flex gap-3">
+      <button id="theme-toggle" class="px-4 py-2 rounded-xl bg-gray-700 dark:bg-gray-300 hover:bg-gray-800 dark:hover:bg-gray-400 transition text-white dark:text-gray-800 font-medium shadow-md">🌙</button>
+      <button onclick="logout()" class="px-5 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 transition text-white font-medium shadow-md">Logout</button>
     </div>
   </div>
 
-  <script>
-    const API_URL = 'http://localhost:8000/api/v1';
-    const token = localStorage.getItem('token');
-    let currentPage = 1;
-    let lastPage = 1;
+  <div class="max-w-6xl w-full flex flex-col lg:flex-row gap-8">
+    <!-- Formulário (lado esquerdo) menor -->
+    <div class="lg:w-1/4 w-full">
+      <div id="news-form" class="p-6 rounded-2xl shadow-lg bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 transition-colors duration-500">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Criar / Editar</h2>
+        <input type="hidden" id="news-id">
 
-    async function loadCategories() {
-      const res = await fetch(`${API_URL}/categories`);
-      const categories = await res.json();
-      const select = document.getElementById('news-category');
-      select.innerHTML = '<option value="">Selecione Categoria</option>';
-      categories.forEach(c => select.innerHTML += `<option value="${c.id}">${c.name}</option>`);
-    }
+        <input type="text" id="news-title" placeholder="Título da Postagem"
+          class="w-full mb-3 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none dark:bg-gray-700 dark:text-gray-100 transition-colors duration-500">
 
-    async function createCategory() {
-      const name = document.getElementById('new-category').value.trim();
-      if(!name) return alert('Digite o nome da categoria!');
-      await fetch(`${API_URL}/categories`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
-        body: JSON.stringify({name})
-      });
-      document.getElementById('new-category').value = '';
-      await loadCategories();
-      alert('Categoria criada!');
-    }
+        <textarea id="news-content" placeholder="Conteúdo da Postagem"
+          class="w-full mb-4 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none dark:bg-gray-700 dark:text-gray-100 transition-colors duration-500 h-40"></textarea>
 
-    async function loadNews(page = 1) {
-      const res = await fetch(`${API_URL}/news?page=${page}`);
-      const data = await res.json();
-      const newsList = document.getElementById('news-list');
-      newsList.innerHTML = '';
-      data.data.forEach(n => {
-        newsList.innerHTML += `
-          <li class="mb-2 p-2 bg-white rounded shadow">
-            <strong>${n.title}</strong> - <em>${n.category?.name || 'Sem categoria'}</em>
-            <p>${n.content}</p>
-            ${n.user.id === data.user_id ? `
-            <div class="flex gap-2 mt-1">
-              <button onclick="editNews(${n.id}, '${n.title.replace(/'/g, "\\'")}', '${n.content.replace(/'/g, "\\'")}', ${n.category?.id || ''})" class="bg-yellow-500 text-white px-2 py-1 rounded">Editar</button>
-              <button onclick="deleteNews(${n.id})" class="bg-red-500 text-white px-2 py-1 rounded">Excluir</button>
-            </div>` : ''}
-          </li>`;
-      });
-      currentPage = data.current_page;
-      lastPage = data.last_page;
-      document.getElementById('page-info').innerText = `Página ${currentPage} de ${lastPage}`;
-    }
+        <div class="flex gap-3">
+          <button onclick="saveNews()" class="flex-1 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 transition text-white font-medium shadow-md">Publicar</button>
+          <button onclick="resetForm()" class="flex-1 px-4 py-2 rounded-xl bg-gray-400 hover:bg-gray-500 transition text-white font-medium shadow-md">Cancelar</button>
+        </div>
+      </div>
+    </div>
 
-    async function saveNews() {
-      const id = document.getElementById('news-id').value;
-      const title = document.getElementById('news-title').value;
-      const content = document.getElementById('news-content').value;
-      const category_id = document.getElementById('news-category').value;
+    <!-- Notícias (lado direito) maior e mais impactante -->
+    <div class="lg:w-3/4 w-full flex flex-col">
+      <ul id="news-list" class="space-y-6 overflow-y-auto max-h-[75vh]">
+        <!-- Notícias serão renderizadas aqui -->
+      </ul>
 
-      if(!title || !content) return alert('Título e conteúdo são obrigatórios!');
-
-      const url = id ? `${API_URL}/news/${id}` : `${API_URL}/news`;
-      const method = id ? 'PUT' : 'POST';
-
-      await fetch(url, {
-        method,
-        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
-        body: JSON.stringify({title, content, category_id})
-      });
-      resetForm();
-      loadNews(currentPage);
-    }
-
-    function editNews(id, title, content, category_id) {
-      document.getElementById('news-id').value = id;
-      document.getElementById('news-title').value = title;
-      document.getElementById('news-content').value = content;
-      document.getElementById('news-category').value = category_id;
-      window.scrollTo(0,0);
-    }
-
-    function resetForm() {
-      document.getElementById('news-id').value = '';
-      document.getElementById('news-title').value = '';
-      document.getElementById('news-content').value = '';
-      document.getElementById('news-category').value = '';
-    }
-
-    async function deleteNews(id) {
-      if(!confirm('Deseja realmente excluir esta notícia?')) return;
-      await fetch(`${API_URL}/news/${id}`, {
-        method: 'DELETE',
-        headers: {'Authorization': 'Bearer ' + token}
-      });
-      loadNews(currentPage);
-    }
-
-    function prevPage() {
-      if(currentPage > 1) loadNews(currentPage - 1);
-    }
-
-    function nextPage() {
-      if(currentPage < lastPage) loadNews(currentPage + 1);
-    }
-
-    function logout() {
-      localStorage.removeItem('token');
-      window.location.href = 'index.html';
-    }
-
-    loadCategories();
-    loadNews();
-  </script>
+      <!-- Paginação -->
+      <div class="mt-4 flex justify-between items-center">
+        <button onclick="prevPage()" class="px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 transition text-white font-medium shadow-md">⬅ Anterior</button>
+        <span id="page-info" class="font-semibold text-gray-700 dark:text-gray-200"></span>
+        <button onclick="nextPage()" class="px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 transition text-white font-medium shadow-md">Próxima ➡</button>
+      </div>
+    </div>
+  </div>
+  <script src="js/theme.js"></script>
+<script src="js/news/news.js"></script>
 </body>
 </html>

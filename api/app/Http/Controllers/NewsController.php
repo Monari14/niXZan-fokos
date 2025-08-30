@@ -11,7 +11,7 @@ class NewsController extends Controller
 {
     public function index()
     {
-        $news = News::with(['user', 'category'])
+        $news = News::with(['user'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -20,7 +20,7 @@ class NewsController extends Controller
 
     public function show($id)
     {
-        $news = News::with(['user', 'category'])->findOrFail($id);
+        $news = News::with(['user'])->findOrFail($id);
         return new NewsResource($news);
     }
 
@@ -30,7 +30,6 @@ class NewsController extends Controller
         $validated = $request->validate([
             'title'       => 'required|string|max:255',
             'content'     => 'required|string',
-            'category_id' => 'required|exists:categories,id',
         ]);
 
         $validated['user_id'] = $user->id;
@@ -51,7 +50,6 @@ class NewsController extends Controller
         $validated = $request->validate([
             'title'       => 'sometimes|string|max:255',
             'content'     => 'sometimes|string',
-            'category_id' => 'sometimes|exists:categories,id',
         ]);
 
         $news->update($validated);
