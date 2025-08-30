@@ -24,8 +24,8 @@ class UserController extends Controller
             return response()->json(['message' => 'Você não pode seguir a si mesmo.'], 400);
         }
 
-        $alreadyFollowing = Follower::where('follower_id', $request->user()->id)
-            ->where('following_id', $userToFollow->id)
+        $alreadyFollowing = Follower::where('id_seguidor', $request->user()->id)
+            ->where('id_seguindo', $userToFollow->id)
             ->exists();
 
         if ($alreadyFollowing) {
@@ -33,8 +33,8 @@ class UserController extends Controller
         }
 
         Follower::create([
-            'follower_id' => $request->user()->id,
-            'following_id' => $userToFollow->id,
+            'id_seguidor' => $request->user()->id,
+            'id_seguindo' => $userToFollow->id,
         ]);
 
         // Chama a notificação de Follow
@@ -51,8 +51,8 @@ class UserController extends Controller
             return response()->json(['message' => 'Usuário não encontrado'], 404);
         }
 
-        Follower::where('follower_id', $request->user()->id)
-            ->where('following_id', $userToUnfollow->id)
+        Follower::where('id_seguidor', $request->user()->id)
+            ->where('id_seguindo', $userToUnfollow->id)
             ->delete();
 
         return response()->json(['message' => 'Você deixou de seguir ' . $username]);
@@ -66,7 +66,7 @@ class UserController extends Controller
             return response()->json(['message' => 'Usuário não encontrado'], 404);
         }
 
-        $followers = $user->followers()->with('follower:id,username')->get()->pluck('follower');
+        $followers = $user->seguidores()->with('seguidor:id,username')->get()->pluck('seguidor');
 
         return response()->json($followers);
     }
@@ -79,7 +79,7 @@ class UserController extends Controller
             return response()->json(['message' => 'Usuário não encontrado'], 404);
         }
 
-        $following = $user->following()->with('following:id,username')->get()->pluck('following');
+        $following = $user->seguindo()->with('seguindo:id,username')->get()->pluck('seguindo');
 
         return response()->json($following);
     }
@@ -106,18 +106,5 @@ class UserController extends Controller
         }
 
         return response()->json(['message' => 'Notificação não encontrada'], 404);
-    }
-
-    public function updatePrivacy(Request $request)
-    {
-        $request->validate([
-            'is_private' => 'required|boolean',
-        ]);
-
-        $user = $request->user();
-        $user->is_private = $request->is_private;
-        $user->save();
-
-        return response()->json(['message' => 'Configuração de privacidade atualizada.', 'is_private' => $user->is_private]);
     }
 }

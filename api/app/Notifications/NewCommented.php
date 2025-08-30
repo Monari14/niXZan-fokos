@@ -5,16 +5,16 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
-class NewLiked extends Notification
+class NewCommented extends Notification
 {
     use Queueable;
 
-    protected $liker;
+    protected $commenter;
     protected $id_new;
 
-    public function __construct($liker, $id_new)
+    public function __construct($commenter, $id_new)
     {
-        $this->liker = $liker;
+        $this->commenter = $commenter;
         $this->id_new = $id_new;
     }
 
@@ -26,7 +26,7 @@ class NewLiked extends Notification
     public function toDatabase($notifiable)
     {
         return [
-            'message' => "{$this->liker->username} curtiu seu post.",
+            'message' => "{$this->commenter->username} comentou seu fok!",
             'id_new' => $this->id_new,
         ];
     }

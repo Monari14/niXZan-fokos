@@ -13,15 +13,15 @@ class NewsController extends Controller
     public function index()
     {
         $news = News::with(['user'])
-            ->orderBy('created_at', 'desc')
+            ->latest()
             ->paginate(10);
 
         return NewsResource::collection($news);
     }
 
-    public function show($id)
+    public function show($id_new)
     {
-        $news = News::with(['user'])->findOrFail($id);
+        $news = News::with(['user'])->findOrFail($id_new);
         return new NewsResource($news);
     }
 
@@ -33,18 +33,18 @@ class NewsController extends Controller
             'content'     => 'required|string',
         ]);
 
-        $validated['user_id'] = $user->id;
+        $validated['id_user'] = $user->id;
 
         $news = News::create($validated);
 
         return new NewsResource($news);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $id_new)
     {
-        $news = News::findOrFail($id);
+        $news = News::findOrFail($id_new);
 
-        if ($news->user_id !== Auth::id()) {
+        if ($news->id_user !== Auth::id()) {
             return response()->json(['error' => 'Não autorizado'], 403);
         }
 
@@ -58,53 +58,52 @@ class NewsController extends Controller
         return new NewsResource($news);
     }
 
-    public function destroy($id)
+    public function destroy($id_new)
     {
-        $news = News::findOrFail($id);
+        $news = News::findOrFail($id_new);
 
-        if ($news->user_id !== Auth::id()) {
+        if ($news->id_user !== Auth::id()) {
             return response()->json(['error' => 'Não autorizado'], 403);
         }
 
         $news->delete();
 
-        return response()->json(['message' => 'Notícia removida com sucesso']);
+        return response()->json(['message' => 'Fok removido com sucesso']);
     }
 
     public function like(Request $request, $id_new)
     {
         $new = News::find($id_new);
         if (!$new) {
-            return response()->json(['message' => 'Mober não encontrado.'], 404);
+            return response()->json(['message' => 'Fok não encontrado.'], 404);
         }
 
-        $alreadyLiked = $new->likes()->where('user_id', $request->user()->id)->exists();
+        $alreadyLiked = $new->likes()->where('id_user', $request->user()->id)->exists();
 
         if ($alreadyLiked) {
-            return response()->json(['message' => 'Você já curtiu este mober.'], 400);
+            return response()->json(['message' => 'Você já curtiu este fok.'], 400);
         }
 
         $new->likes()->create([
-            'user_id' => $request->user()->id,
+            'id_user' => $request->user()->id,
         ]);
 
-        // Notifica o like
         $new->user->notify(new NewLiked($request->user(), $new->id));
 
-        return response()->json(['message' => 'Mober curtido!']);
+        return response()->json(['message' => 'Fok curtido!']);
     }
 
     public function unlike(Request $request, $id_new)
     {
         $new = News::find($id_new);
         if (!$new) {
-            return response()->json(['message' => 'Mober não encontrado.'], 404);
+            return response()->json(['message' => 'Fok não encontrado.'], 404);
         }
 
-        $like = $new->likes()->where('user_id', $request->user()->id)->first();
+        $like = $new->likes()->where('id_user', $request->user()->id)->first();
 
         if (!$like) {
-            return response()->json(['message' => 'Você não curtiu este mober.'], 400);
+            return response()->json(['message' => 'Você não curtiu este fok.'], 400);
         }
 
         $like->delete();

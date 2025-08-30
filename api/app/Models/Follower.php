@@ -6,15 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Follower extends Model
 {
-    protected $fillable = ['follower_id', 'following_id'];
+    protected $fillable = [
+        'id_seguidor',
+        'id_seguindo'
+    ];
 
-    public function follower()
+    public function seguidor()
     {
-        return $this->belongsTo(User::class, 'follower_id');
+        return $this->belongsTo(User::class, 'id_seguidor');
     }
 
-    public function following()
+    public function seguindo()
     {
-        return $this->belongsTo(User::class, 'following_id');
+        return $this->belongsTo(User::class, 'id_seguindo');
     }
 }

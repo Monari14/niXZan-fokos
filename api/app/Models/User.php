@@ -16,8 +16,12 @@ class User extends Authenticatable
         'name',
         'username',
         'email',
+        'bio',
         'password',
+        'avatar',
     ];
+
+    protected $appends = ['avatar_url'];
 
     protected $hidden = [
         'password',
@@ -36,4 +40,26 @@ class User extends Authenticatable
     {
         return $this->hasMany(News::class);
     }
+    public function seguidores()
+    {
+        return $this->hasMany(Follower::class, 'id_seguindo');
+    }
+
+    public function seguindo()
+    {
+        return $this->hasMany(Follower::class, 'id_seguidor');
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+    public function getAvatarUrlAttribute()
+    {
+        if ($this->avatar && file_exists(storage_path('app/public/' . $this->avatar))) {
+            return asset('s/' . $this->avatar);
+        }
+        return asset('i/avatar-default.png');
+    }
+
 }
