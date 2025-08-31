@@ -39,8 +39,14 @@ async function saveNews() {
 
     await fetch(url, {
     method,
-    headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
-    body: JSON.stringify({title, content, category_id: 1})
+    headers: {
+        'Content-Type': 'application/json', 
+        'Authorization': 'Bearer ' + token
+    },
+        body: JSON.stringify({
+            title, 
+            content
+        })
     });
 
     resetForm();
