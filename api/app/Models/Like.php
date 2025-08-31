@@ -6,15 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Like extends Model
 {
-    protected $fillable = ['user_id', 'momento_id'];
+    protected $fillable = ['id_user', 'id_new'];
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'id_user');
     }
 
-    public function new()
+    public function news()
     {
-        return $this->belongsTo(News::class);
+        return $this->belongsTo(News::class, 'id_new');
     }
 }

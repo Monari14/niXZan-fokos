@@ -3,108 +3,52 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\News;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\PerfilResource;
 
 class PerfilController extends Controller {
     public function index(Request $request, $username)
     {
-        try {
-            $user = User::where('username', $username)->firstOrFail();
-        } catch (ModelNotFoundException $e) {
+        $user = User::where('username', $username)->first();
+
+        if (!$user) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Usuário não encontrado',
             ], 404);
         }
 
-        $news = News::all()
-            ->where('id_user', $user->id)
-            ->latest()
-            ->get();
-
-        $newsFormatados = $news->map(function ($new) {
-            return [
-                'id' => $new->id,
-                'title' => $new->title,
-                'content' => $new->content,
-                'data_completa' => $new->created_at->toDateTimeString(),
-                'data' => $new->created_at->diffForHumans(),
-            ];
-        });
-
         return response()->json([
-            'dados' => [
-                'usuario' => [
-                    'id' => $user->id,
-                    'nome' => $user->name,
-                    'username' => $user->username,
-                    'bio' => $user->bio ?? '',
-                    'avatar_url' => url($user->avatar_url),
-                    'stats' => [
-                        'seguindo' => $user->seguindo()->count(),
-                        'seguidores' => $user->seguidores()->count(),
-                        'fok_count' => $user->noticias()->count(),
-                        'likes_count' => $user->likes()->count(),
-                    ],
-                ],
-                'foks' => $newsFormatados,
-            ],
+            'status' => 'success',
+            'data'   => new PerfilResource($user)
         ], 200);
     }
     public function me(Request $request)
     {
         $user = Auth::user();
 
-        if(!$user) {
+        if (!$user) {
             return response()->json([
-                'message' => 'Usuário não encontrado',
-            ], 404);
+                'status'  => 'error',
+                'message' => 'Usuário não autenticado ou token inválido',
+            ], 401);
         }
 
-        $news = News::all()
-            ->where('id_user', $user->id)
-            ->latest()
-            ->get();
-
-        $newsFormatados = $news->map(function ($new) {
-            return [
-                'id' => $new->id,
-                'title' => $new->title,
-                'content' => $new->content,
-                'data_completa' => $new->created_at->toDateTimeString(),
-                'data' => $new->created_at->diffForHumans(),
-            ];
-        });
-
         return response()->json([
-            'dados' => [
-                'usuario' => [
-                    'id' => $user->id,
-                    'nome' => $user->name,
-                    'username' => $user->username,
-                    'bio' => $user->bio ?? '',
-                    'avatar_url' => url($user->avatar_url),
-                    'stats' => [
-                        'seguindo' => $user->seguindo()->count(),
-                        'seguidores' => $user->seguidores()->count(),
-                        'fok_count' => $user->noticias()->count(),
-                        'likes_count' => $user->likes()->count(),
-                    ],
-                ],
-                'foks' => $newsFormatados,
-            ],
+            'status' => 'success',
+            'data'   => new PerfilResource($user),
         ], 200);
     }
+
     public function update(Request $request)
     {
         $user = Auth::user();
 
         if (!$user) {
             return response()->json([
+                'status'  => 'error',
                 'message' => 'Usuário não autenticado.'
             ], 401);
         }
@@ -119,19 +63,20 @@ class PerfilController extends Controller {
 
         if ($validator->fails()) {
             return response()->json([
+                'status'  => 'error',
                 'message' => 'Erro de validação.',
                 'errors'  => $validator->errors(),
             ], 422);
         }
 
-        $fields = ['name', 'username', 'email', 'bio'];
-
-        foreach ($fields as $field) {
-            if ($request->has($field)) {
+        // Atualiza campos enviados (mesmo vazios)
+        foreach (['name', 'username', 'email', 'bio'] as $field) {
+            if ($request->has($field) || $request->exists($field)) {
                 $user->$field = $request->input($field);
             }
         }
 
+        // Atualiza avatar se enviado
         if ($request->hasFile('avatar')) {
             $avatarPath = $request->file('avatar')->store('a', 'public');
             $user->avatar = $avatarPath;
@@ -140,17 +85,12 @@ class PerfilController extends Controller {
         $user->save();
 
         return response()->json([
+            'status'  => 'success',
             'message' => 'Usuário atualizado com sucesso.',
-            'data' => [
-                'id'       => $user->id,
-                'name'     => $user->name,
-                'username' => $user->username,
-                'email'    => $user->email,
-                'bio'      => $user->bio,
-                'avatar'   => $user->avatar_url,
-            ],
+            'data'    => new PerfilResource($user),
         ], 200);
     }
+
     public function avatar(Request $request) {
         $user = Auth::user();
 
@@ -163,7 +103,7 @@ class PerfilController extends Controller {
         return response()->json([
             'usuario' => [
                 'username' => $user->username,
-                'avatar_url' => url($user->avatar_url),
+                'avatar' => url($user->avatar_url),
             ],
         ]);
     }

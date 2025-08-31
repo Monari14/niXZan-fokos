@@ -4,85 +4,78 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\News;
+use Auth;
 use Illuminate\Http\Request;
 use App\Notifications\NewCommented;
+use App\Http\Resources\CommentResource;
 
 class CommentController extends Controller
 {
-
     public function store(Request $request, $id_new)
     {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Usuário não autenticado.',
+            ], 401);
+        }
+
         $request->validate([
             'content' => 'required|string|max:1000',
         ]);
 
-        $new = News::find($id_new);
+        $news = News::find($id_new);
 
-        if (!$new) {
+        if (!$news) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Mober não encontrado.',
+                'message' => 'Fok não encontrado.',
             ], 404);
         }
 
         $comment = Comment::create([
-            'id_new' => $id_new,
-            'id_user' => $request->user()->id,
+            'id_new'  => $id_new,
+            'id_user' => $user->id,
             'content' => $request->input('content'),
         ]);
 
-        // Notifica que o post foi comentado
-        $new->usuario->notify(new NewCommented($request->user(), $new->id));
+        try {
+            $news->user->notify(new NewCommented($request->user(), $news->id));
+        } catch (\Exception $e) {
+            \Log::warning('Falha ao enviar notificação de comentário: '.$e->getMessage());
+        }
 
-        // Carrega o relacionamento do usuário para já retornar junto
         $comment->load('user:id,username,avatar');
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'Comentário adicionado com sucesso!',
-            'data' => [
-                'id' => $comment->id,
-                'content' => $comment->content,
-                'created_at' => $comment->created_at->diffForHumans(),
-                'user' => [
-                    'id' => $comment->user->id,
-                    'username' => $comment->user->username,
-                    'avatar_url' => $comment->user->avatar_url
-                ]
-            ]
+            'data'    => new CommentResource($comment)
         ], 201);
     }
 
     public function index($id_new)
     {
-        $new = News::find($id_new);
+        $news = News::find($id_new);
 
-        if (!$new) {
+        if (!$news) {
             return response()->json([
+                'status'  => 'error',
                 'message' => 'Fok não encontrado.',
             ], 404);
         }
 
-        $comments = $new->comments()
+        $comments = $news->comments()
             ->with('user:id,username,avatar')
             ->latest()
-            ->get()
-            ->map(function ($comment) {
-                return [
-                    'id' => $comment->id,
-                    'content' => $comment->content,
-                    'created_at' => $comment->created_at->diffForHumans(),
-                    'user' => [
-                        'id' => $comment->user->id,
-                        'username' => $comment->user->username,
-                        'avatar_url' => $comment->user->avatar_url
-                    ]
-                ];
-            });
+            ->get();
 
         return response()->json([
+            'status'  => 'success',
             'message' => 'Comentários carregados com sucesso.',
-            'data' => $comments
+            'data'    => CommentResource::collection($comments)
         ], 200);
     }
 
@@ -97,7 +90,7 @@ class CommentController extends Controller
             ], 404);
         }
 
-        if ($comment->user_id !== $request->user()->id) {
+        if ($comment->id_user !== $request->user()->id) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Não autorizado.',
@@ -111,5 +104,4 @@ class CommentController extends Controller
             'message' => 'Comentário deletado com sucesso.',
         ], 200);
     }
-
 }

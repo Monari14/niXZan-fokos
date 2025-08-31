@@ -38,8 +38,9 @@ class User extends Authenticatable
     }
     public function noticias()
     {
-        return $this->hasMany(News::class);
+        return $this->hasMany(News::class, 'id_user');
     }
+
     public function seguidores()
     {
         return $this->hasMany(Follower::class, 'id_seguindo');
@@ -52,8 +53,20 @@ class User extends Authenticatable
 
     public function likes()
     {
-        return $this->hasMany(Like::class);
+        return $this->hasMany(Like::class, 'id_user');
     }
+    public function receivedLikes()
+    {
+        return $this->hasManyThrough(
+            Like::class,
+            News::class,
+            'id_user',
+            'id_new',
+            'id',
+            'id'
+        );
+    }
+
     public function getAvatarUrlAttribute()
     {
         if ($this->avatar && file_exists(storage_path('app/public/' . $this->avatar))) {

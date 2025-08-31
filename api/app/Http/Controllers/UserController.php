@@ -5,10 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Follower;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use App\Notifications\UserFollowed;
+use App\Http\Resources\FollowersResource;
 
 class UserController extends Controller
 {
@@ -42,7 +40,6 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Agora você está seguindo ' . $username]);
     }
-
     public function unfollow(Request $request, $username)
     {
         $userToUnfollow = User::where('username', $username)->first();
@@ -51,9 +48,15 @@ class UserController extends Controller
             return response()->json(['message' => 'Usuário não encontrado'], 404);
         }
 
-        Follower::where('id_seguidor', $request->user()->id)
+        $follower = Follower::where('id_seguidor', $request->user()->id)
             ->where('id_seguindo', $userToUnfollow->id)
-            ->delete();
+            ->first();
+
+        if (!$follower) {
+            return response()->json(['message' => 'Você não está seguindo este usuário.'], 400);
+        }
+
+        $follower->delete();
 
         return response()->json(['message' => 'Você deixou de seguir ' . $username]);
     }
@@ -66,9 +69,13 @@ class UserController extends Controller
             return response()->json(['message' => 'Usuário não encontrado'], 404);
         }
 
-        $followers = $user->seguidores()->with('seguidor:id,username')->get()->pluck('seguidor');
+        // Pega os seguidores do usuário
+        $followers = Follower::with('seguidor')
+            ->where('id_seguindo', $user->id)
+            ->get()
+            ->pluck('seguidor');
 
-        return response()->json($followers);
+        return FollowersResource::collection($followers);
     }
 
     public function following($username)
@@ -79,9 +86,13 @@ class UserController extends Controller
             return response()->json(['message' => 'Usuário não encontrado'], 404);
         }
 
-        $following = $user->seguindo()->with('seguindo:id,username')->get()->pluck('seguindo');
+        // Pega os usuários que o usuário está seguindo
+        $following = Follower::with('seguindo')
+            ->where('id_seguidor', $user->id)
+            ->get()
+            ->pluck('seguindo');
 
-        return response()->json($following);
+        return FollowersResource::collection($following);
     }
 
     public function notifications(Request $request)
@@ -95,7 +106,6 @@ class UserController extends Controller
             ],
         ]);
     }
-
     public function markNotificationAsRead(Request $request, $notificationId)
     {
         $notification = $request->user()->notifications()->find($notificationId);

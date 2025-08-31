@@ -14,12 +14,11 @@ class Comment extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'id_user');
     }
 
     public function noticia()
     {
-        return $this->belongsTo(News::class);
+        return $this->belongsTo(News::class, 'id_new');
     }
 }
-

@@ -12,21 +12,21 @@ class News extends Model
     protected $fillable = [
         'title',
         'content',
-        'user_id',
+        'id_user',
     ];
 
-    // Relacionamento: uma notícia pertence a um usuário (autor)
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'id_user');
     }
+
     public function likes()
     {
-        return $this->hasMany(Like::class);
+        return $this->hasMany(Like::class, 'id_new');
     }
 
     public function comments()
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasMany(Comment::class, 'id_new');
     }
 }

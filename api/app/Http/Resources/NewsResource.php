@@ -16,6 +16,7 @@ class NewsResource extends JsonResource
             'username'     => $this->user->username ?? null,
             'avatar'       => $this->user->avatar_url ?? null,
             'created_at'   => $this->created_at->toDateTimeString(),
+            'created_at_human' => $this->created_at->diffForHumans(),
         ];
     }
 }

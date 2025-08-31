@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    // Registro de novo usuário
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -45,8 +44,6 @@ class AuthController extends Controller
             'token' => $token,
         ], 201);
     }
-
-    // Login de usuário
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -84,8 +81,6 @@ class AuthController extends Controller
             'token' => $token,
         ], 200);
     }
-
-    // Logout
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -94,7 +89,6 @@ class AuthController extends Controller
             'message' => 'Logout realizado com sucesso.',
         ]);
     }
-
     public function update(Request $request)
     {
         $user = Auth::user();
@@ -139,7 +133,6 @@ class AuthController extends Controller
             ],
         ]);
     }
-
     public function destroy(Request $request)
     {
         $user = Auth::user();
