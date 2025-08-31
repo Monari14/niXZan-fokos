@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NewsController;
@@ -7,22 +8,22 @@ use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CommentController;
 
-Route::prefix('v1')->group(function () {
-    Route::prefix('auth')->group(function () {
+Route::prefix('/v1')->group(function () {
+    Route::prefix('/auth')->group(function () {
         Route::post('/register', [AuthController::class, 'register']); //
         Route::post('/login', [AuthController::class, 'login']); //
     });
 
     Route::get('/user/username/{username}', [PerfilController::class, 'index']);
 
-    Route::prefix('news')->group(function () {
+    Route::prefix('/news')->group(function () {
         Route::get('/', [NewsController::class, 'index']); //
         Route::get('/{id_new}', [NewsController::class, 'show']); //
     });
 
     Route::middleware('auth:sanctum')->group(function () {
 
-        Route::prefix('news')->group(function () {
+        Route::prefix('/news')->group(function () {
             Route::post('/', [NewsController::class, 'store']); //
             Route::put('/{id_new}', [NewsController::class, 'update']);//
             Route::delete('/{id_new}', [NewsController::class, 'destroy']); //
@@ -48,8 +49,12 @@ Route::prefix('v1')->group(function () {
             Route::get('/{username}/following', [UserController::class, 'following']); //
         });
 
-        Route::prefix('auth')->group(function () {
+        Route::prefix('/auth')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout']); //
+        });
+
+        Route::prefix('/user/settings')->group(function () {
+            Route::post('/theme', [SettingsController::class, 'theme']); //
         });
 
     });
