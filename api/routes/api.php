@@ -54,6 +54,7 @@ Route::prefix('/v1')->group(function () {
         });
 
         Route::prefix('/user/settings')->group(function () {
+            Route::get('/theme', [SettingsController::class, 'getTheme']); //
             Route::post('/theme', [SettingsController::class, 'theme']); //
         });
 

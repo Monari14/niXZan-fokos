@@ -8,6 +8,24 @@ use App\Models\UserSettings;
 
 class SettingsController extends Controller
 {
+    public function getTheme()
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Usuário não autenticado.'], 401);
+        }
+
+        $userSetting = UserSettings::where('id_user', $user->id)->first();
+
+        if (!$userSetting) {
+            return response()->json(['theme' => null], 200);
+        }
+
+        return response()->json([
+            'theme' => $userSetting->theme
+        ], 200);
+    }
     public function theme(Request $request)
     {
         $user = Auth::user();
