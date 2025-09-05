@@ -7,6 +7,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\SearchController;
 
 Route::prefix('/v1')->group(function () {
     Route::prefix('/auth')->group(function () {
@@ -58,5 +59,9 @@ Route::prefix('/v1')->group(function () {
             Route::post('/theme', [SettingsController::class, 'theme']); //
         });
 
+        Route::prefix('/search')->group(function () {
+            Route::post('/title', [SearchController::class, 'title']); //
+            Route::get('/category', [SearchController::class, 'category']); //
+        });
     });
 });

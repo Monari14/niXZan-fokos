@@ -104,7 +104,6 @@ class NewsController extends Controller
 
         if (!$user) {
             return response()->json([
-                'success' => false,
                 'message' => 'Usuário não autenticado.'
             ], 401);
         }
@@ -112,23 +111,23 @@ class NewsController extends Controller
         $news = News::find($id_new);
         if (!$news) {
             return response()->json([
-                'success' => false,
                 'message' => 'Fok não encontrado.'
             ], 404);
         }
 
         if ($news->id_user === $user->id) {
             return response()->json([
-                'success' => false,
                 'message' => 'Você não pode curtir seu próprio Fok.'
             ], 403);
         }
 
         if ($news->likes()->where('id_user', $user->id)->exists()) {
+            // Já curtiu, mas retorna o estado atual
+            $news->loadCount('likes');
             return response()->json([
-                'success' => false,
-                'message' => 'Você já curtiu este Fok.'
-            ], 400);
+                'likes_count' => $news->likes_count,
+                'liked_by_me' => true
+            ], 200);
         }
 
         try {
@@ -145,14 +144,12 @@ class NewsController extends Controller
             $news->loadCount('likes');
 
             return response()->json([
-                'success' => true,
-                'message' => 'Fok curtido com sucesso!',
-                'likes'   => $news->likes_count
+                'likes_count' => $news->likes_count,
+                'liked_by_me' => true
             ], 201);
 
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
                 'message' => 'Erro ao curtir o Fok.',
                 'errors'  => $e->getMessage()
             ], 500);
@@ -164,7 +161,6 @@ class NewsController extends Controller
 
         if (!$user) {
             return response()->json([
-                'success' => false,
                 'message' => 'Usuário não autenticado.'
             ], 401);
         }
@@ -172,17 +168,17 @@ class NewsController extends Controller
         $news = News::find($id_new);
         if (!$news) {
             return response()->json([
-                'success' => false,
                 'message' => 'Fok não encontrado.'
             ], 404);
         }
 
         $like = $news->likes()->where('id_user', $user->id)->first();
         if (!$like) {
+            $news->loadCount('likes');
             return response()->json([
-                'success' => false,
-                'message' => 'Você não curtiu este Fok.'
-            ], 400);
+                'likes_count' => $news->likes_count,
+                'liked_by_me' => false
+            ], 200);
         }
 
         try {
@@ -191,14 +187,12 @@ class NewsController extends Controller
             $news->loadCount('likes');
 
             return response()->json([
-                'success' => true,
-                'message' => 'Curtida removida com sucesso.',
-                'likes'   => $news->likes_count
+                'likes_count' => $news->likes_count,
+                'liked_by_me' => false
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
                 'message' => 'Erro ao remover curtida.',
                 'errors'  => $e->getMessage()
             ], 500);

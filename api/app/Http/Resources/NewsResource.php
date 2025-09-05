@@ -17,6 +17,10 @@ class NewsResource extends JsonResource
             'avatar'       => $this->user->avatar_url ?? null,
             'created_at'   => $this->created_at->toDateTimeString(),
             'created_at_human' => $this->created_at->diffForHumans(),
+            'likes_count'  => $this->whenLoaded('likes', function() {
+                return $this->likes->count();
+            }, isset($this->likes_count) ? $this->likes_count : 0),
+            'liked_by_me'  => auth()->check() ? $this->likes()->where('id_user', auth()->id())->exists() : false,
         ];
     }
 }

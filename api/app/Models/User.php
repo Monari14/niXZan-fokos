@@ -72,7 +72,7 @@ class User extends Authenticatable
         if ($this->avatar && file_exists(storage_path('app/public/' . $this->avatar))) {
             return asset('s/' . $this->avatar);
         }
-        return asset('i/avatar-default.png');
+        return asset('s/i/avatar-default.png');
     }
 
 }

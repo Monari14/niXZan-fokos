@@ -20,7 +20,7 @@
     <h1 class="text-4xl font-extrabold bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent tracking-tight">fokos</h1>
     <div class="flex gap-3">
       <button id="theme-toggle" class="px-4 py-2 rounded-xl bg-gray-700 dark:bg-gray-300 hover:bg-gray-800 dark:hover:bg-gray-400 transition text-white dark:text-gray-800 font-medium shadow-md">🌙</button>
-      <button onclick="logout()" class="px-5 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 transition text-white font-medium shadow-md">Logout</button>
+      <button onclick="logout()" class="px-5 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 transition text-white font-medium shadow-md">Sair</button>
     </div>
   </div>
 
@@ -48,6 +48,25 @@
     <div class="lg:w-3/4 w-full flex flex-col">
       <ul id="news-list" class="space-y-6 overflow-y-auto max-h-[75vh]">
         <!-- Notícias serão renderizadas aqui -->
+      </ul>
+
+      <!-- Modal de Detalhes da Notícia -->
+      <div id="news-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full p-6 relative">
+          <button id="close-modal" class="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+          <div id="modal-news-content">
+            <!-- Conteúdo da notícia será inserido aqui -->
+          </div>
+          <div class="mt-4">
+            <h3 class="font-semibold mb-2">Comentários</h3>
+            <ul id="modal-comments" class="space-y-2 max-h-40 overflow-y-auto"></ul>
+            <div class="flex gap-2 mt-2">
+              <input id="modal-comment-input" type="text" placeholder="Adicionar comentário..." class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+              <button id="modal-comment-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">Comentar</button>
+            </div>
+          </div>
+        </div>
+      </div>
       </ul>
 
       <!-- Paginação -->
